@@ -9,6 +9,8 @@ def check_and_install_requirements():
         subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools'])
         import pkg_resources
 
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
+
     requirements_path = 'requirements.txt'
     if os.path.isfile(requirements_path):
         with open(requirements_path, 'r') as file:
