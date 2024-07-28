@@ -64,8 +64,29 @@ class App(QWidget):
         self.tabWidget = QTabWidget()
         layout.addWidget(self.tabWidget)
 
+        self.installTab = QWidget()
+        self.tabWidget.addTab(self.installTab, "Install Programs")
+
+        installLayout = QVBoxLayout()
+        hLayout = QHBoxLayout()
+
+        installLayout.addLayout(hLayout)
+
+        self.listWidget = QListWidget()
+        installLayout.addWidget(self.listWidget)
+
+        self.installTab.setLayout(installLayout)
         self.setLayout(layout)
+        self.loadFolders()
     
+    def loadFolders(self):
+        folder_path = 'Programs'
+        folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
+        self.totalPrograms = len(folders)  # Set the total number of programs
+        for folder in folders:
+            item = QListWidgetItem(folder)
+            self.listWidget.addItem(item)
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
