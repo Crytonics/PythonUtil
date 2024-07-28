@@ -147,6 +147,13 @@ class App(QWidget):
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
+        
+        # Reset text for items marked as failed
+        for i in range(self.listWidget.count()):
+            item = self.listWidget.item(i)
+            if "(Failed)" in item.text():
+                item.setText(item.text().replace(" (Failed)", ""))
+        
         if selected_items:
             self.installQueue = selected_items
             self.progressBar.setMaximum(100)
@@ -192,6 +199,7 @@ class App(QWidget):
                     # Disable the checkbox
                     item.setCheckState(Qt.Unchecked)
                     item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+                    item.setText(f"{program_name} (Installed)")
                     self.installCounter += 1  # Increment the counter by 1
                 else:
                     item.setBackground(Qt.red)
