@@ -127,6 +127,23 @@ class App(QWidget):
             else:
                 QMessageBox.warning(self, 'Install', 'Some programs failed to install')
 
+    def onInstallFinished(self, program_name, success):
+        for i in range(self.listWidget.count()):
+            item = self.listWidget.item(i)
+            if item.text() == program_name:
+                if success:
+                    QMessageBox.information(self, 'Install', f'Installing {program_name} completed successfully')
+                    item.setBackground(Qt.green)
+                    # Disable the checkbox
+                    item.setCheckState(Qt.Unchecked)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+                    self.installCounter += 1  # Increment the counter by 1
+                else:
+                    item.setBackground(Qt.red)
+                    QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
+                    self.all_installed_successfully = False  # Set flag to False if any installation fails
+                break
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
