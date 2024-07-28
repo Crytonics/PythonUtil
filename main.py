@@ -163,31 +163,28 @@ class App(QWidget):
             program_name = item.text()
             program_folder = os.path.join('Programs', program_name)
             exe_files = [f for f in os.listdir(program_folder) if f.endswith('.exe')]
-            msi_files = [f for f in os.listdir(program_folder) if f.endswith('.msi')]
-            msix_files = [f for f in os.listdir(program_folder) if f.endswith('.msix')]
 
-            if exe_files or msi_files or msix_files:
-                program_path = os.path.join(program_folder, exe_files[0] if exe_files else (msi_files[0] if msi_files else msix_files[0]))
+            if exe_files:
+                program_path = os.path.join(program_folder, exe_files[0])
 
                 self.thread = InstallThread(program_path, program_name)
                 self.thread.install_finished.connect(self.onInstallFinished)
                 self.thread.start()
             else:
-                QMessageBox.warning(self, 'File Not Found', f'No .exe, .msi, or .msix file found in {program_name} folder')
+                QMessageBox.warning(self, 'File Not Found', f'No .exe file found in {program_name} folder')
                 self.installNext()  # Continue with the next item
         else:
             if self.all_installed_successfully:
                 QMessageBox.information(self, 'Install', 'All selected programs have been installed')
             else:
                 QMessageBox.warning(self, 'Install', 'Some programs failed to install')
-            self.progressBar.setValue(100)  # Ensure progress bar is set to 100% when done
 
     def onInstallFinished(self, program_name, success):
         for i in range(self.listWidget.count()):
             item = self.listWidget.item(i)
             if item.text() == program_name:
                 if success:
-                    #QMessageBox.information(self, 'Install', f'Installing {program_name} completed successfully')
+                    QMessageBox.information(self, 'Install', f'Installing {program_name} completed successfully')
                     item.setBackground(Qt.green)
                     # Disable the checkbox
                     item.setCheckState(Qt.Unchecked)
@@ -196,7 +193,7 @@ class App(QWidget):
                 else:
                     item.setBackground(Qt.red)
                     item.setText(f"{program_name} (Failed)")
-                    #QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
+                    QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
                     self.all_installed_successfully = False  # Set flag to False if any installation fails
                 break
         self.progressBar.setValue(self.progressBar.value() + int(self.increment))
