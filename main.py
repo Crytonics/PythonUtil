@@ -72,6 +72,9 @@ class App(QWidget):
 
         installLayout.addLayout(hLayout)
 
+        self.counterLabel = QLabel('Installed: 0/0')
+        hLayout.addWidget(self.counterLabel)
+
         self.listWidget = QListWidget()
         installLayout.addWidget(self.listWidget)
 
@@ -89,6 +92,9 @@ class App(QWidget):
         self.setLayout(layout)
         self.loadFolders()
     
+    def updateCounterLabel(self):
+        self.counterLabel.setText(f'Installed: {self.installCounter}/{self.totalPrograms}')
+
     def loadFolders(self):
         folder_path = 'Programs'
         folders = [f for f in os.listdir(folder_path) if os.path.isdir(os.path.join(folder_path, f))]
@@ -97,6 +103,7 @@ class App(QWidget):
             item = QListWidgetItem(folder)
             item.setCheckState(Qt.Unchecked)
             self.listWidget.addItem(item)
+        self.updateCounterLabel()  # Update the counter label after loading folders
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
@@ -149,6 +156,7 @@ class App(QWidget):
                     self.all_installed_successfully = False  # Set flag to False if any installation fails
                 break
             self.progressBar.setValue(self.progressBar.value() + int(self.increment))
+            self.updateCounterLabel()  # Update the counter label after each installation
             self.installNext()  # Continue with the next item
 
 if __name__ == '__main__':
