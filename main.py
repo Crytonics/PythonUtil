@@ -71,7 +71,7 @@ class App(QWidget):
         hLayout = QHBoxLayout()
 
         installLayout.addLayout(hLayout)
-
+        
         # Add "Select All" checkbox
         self.selectAllCheckbox = QCheckBox('Select All')
         self.selectAllCheckbox.stateChanged.connect(self.selectAll)
@@ -96,7 +96,7 @@ class App(QWidget):
         self.installTab.setLayout(installLayout)
         self.setLayout(layout)
         self.loadFolders()
-    
+
     def updateCounterLabel(self):
         self.counterLabel.setText(f'Installed: {self.installCounter}/{self.totalPrograms}')
 
@@ -165,9 +165,9 @@ class App(QWidget):
                     QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
                     self.all_installed_successfully = False  # Set flag to False if any installation fails
                 break
-            self.progressBar.setValue(self.progressBar.value() + int(self.increment))
-            self.updateCounterLabel()  # Update the counter label after each installation
-            self.installNext()  # Continue with the next item
+        self.progressBar.setValue(self.progressBar.value() + int(self.increment))
+        self.updateCounterLabel()  # Update the counter label after each installation
+        self.installNext()  # Continue with the next item
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
