@@ -1,5 +1,27 @@
 import sys
 import os
+import subprocess
+
+def check_and_install_requirements():
+    try:
+        import pkg_resources
+    except ImportError:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools'])
+        import pkg_resources
+
+    requirements_path = 'requirements.txt'
+    if os.path.isfile(requirements_path):
+        with open(requirements_path, 'r') as file:
+            requirements = file.read().splitlines()
+        
+        installed_packages = {pkg.key for pkg in pkg_resources.working_set}
+        missing_packages = [pkg for pkg in requirements if pkg not in installed_packages]
+
+        if missing_packages:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing_packages])
+
+check_and_install_requirements()
+
 from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton, QMessageBox, QListWidgetItem, QProgressBar, QCheckBox, QLabel, QTabWidget
 from PyQt5.QtCore import QThread, pyqtSignal, Qt
 
