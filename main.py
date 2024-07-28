@@ -1,6 +1,7 @@
 import sys
 import os
 import subprocess
+import winreg
 
 def check_and_install_requirements():
     try:
@@ -117,13 +118,32 @@ class App(QWidget):
         for folder in folders:
             item = QListWidgetItem(folder)
             item.setCheckState(Qt.Unchecked)
+            if self.is_program_installed(folder):
+                item.setBackground(Qt.green)
+                item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+                item.setText(f"{folder} (Installed)")
             self.listWidget.addItem(item)
         self.updateCounterLabel()  # Update the counter label after loading folders
+
+    def is_program_installed(self, program_name):
+        uninstall_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, uninstall_key) as key:
+            for i in range(0, winreg.QueryInfoKey(key)[0]):
+                sub_key_name = winreg.EnumKey(key, i)
+                with winreg.OpenKey(key, sub_key_name) as sub_key:
+                    try:
+                        display_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
+                        if program_name.lower() in display_name.lower():
+                            return True
+                    except FileNotFoundError:
+                        pass
+        return False
 
     def selectAll(self, state):
         for i in range(self.listWidget.count()):
             item = self.listWidget.item(i)
-            item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+            if item.background() != Qt.green:  # Check if the item is not marked as installed
+                item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
@@ -172,6 +192,7 @@ class App(QWidget):
                     self.installCounter += 1  # Increment the counter by 1
                 else:
                     item.setBackground(Qt.red)
+                    item.setText(f"{program_name} (Failed)")
                     QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
                     self.all_installed_successfully = False  # Set flag to False if any installation fails
                 break
