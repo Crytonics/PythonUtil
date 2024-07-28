@@ -3,6 +3,7 @@ import os
 import subprocess
 import winreg
 import ctypes
+import json
 
 def is_admin():
     try:
@@ -60,6 +61,18 @@ class InstallThread(QThread):
             else:
                 raise
 
+class UninstallThread(QThread):
+    uninstall_finished = pyqtSignal(str, bool)
+
+    def __init__(self, program_name):
+        super().__init__()
+        self.program_name = program_name
+
+    def run(self):
+        result = subprocess.run([sys.executable, 'scripts/uninstall.py', self.program_name])
+        success = (result.returncode == 0)
+        self.uninstall_finished.emit(self.program_name, success)
+        
 class App(QWidget):
     def __init__(self):
         super().__init__()
@@ -111,17 +124,77 @@ class App(QWidget):
 
         # New Tab
         self.newTab = QWidget()
-        self.tabWidget.addTab(self.newTab, "Scripts")
+        self.tabWidget.addTab(self.newTab, "Uninstall Programs")
 
         newTabLayout = QVBoxLayout()
         self.newTab.setLayout(newTabLayout)
         
-        # Add new list to the "Scripts" tab
+        # Add new list to the "Uninstall Programs" tab
         self.scriptsListWidget = QListWidget()
         newTabLayout.addWidget(self.scriptsListWidget)
 
+        # Add uninstall button
+        self.uninstallButton = QPushButton('Uninstall Selected')
+        self.uninstallButton.clicked.connect(self.uninstallSelected)
+        newTabLayout.addWidget(self.uninstallButton)
+
+        # Load uninstall data from JSON
+        self.loadUninstallData()
+
         self.selectAllCheckbox.stateChanged.connect(self.selectAll)
         self.listWidget.itemChanged.connect(self.onItemChanged)
+
+    def loadUninstallData(self):
+        with open('functions/uninstall/uninstall.json', 'r', encoding='utf-8') as file:
+            uninstall_data = json.load(file)
+        
+            for item in uninstall_data:
+                list_item = QListWidgetItem(item['name'])
+                list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
+                list_item.setCheckState(Qt.Unchecked)
+                self.scriptsListWidget.addItem(list_item)
+
+    def uninstallSelected(self):
+        selected_items = [self.scriptsListWidget.item(i) for i in range(self.scriptsListWidget.count()) if self.scriptsListWidget.item(i).checkState() == Qt.Checked]
+        
+        # Reset text for items marked as failed
+        for i in range(self.scriptsListWidget.count()):
+            item = self.scriptsListWidget.item(i)
+            if "(Failed)" in item.text():
+                item.setText(item.text().replace(" (Failed)", ""))
+        
+        if selected_items:
+            for item in selected_items:
+                item.setBackground(Qt.yellow)
+                item.setText(f"{item.text()} (Uninstalling...)")
+            
+            self.uninstallQueue = selected_items
+            self.uninstallNext()
+        else:
+            QMessageBox.warning(self, 'No Selection', 'Please select programs to uninstall')
+
+    def uninstallNext(self):
+        if self.uninstallQueue:
+            item = self.uninstallQueue.pop(0)
+            program_name = item.text().replace(" (Uninstalling...)", "")
+            self.thread = UninstallThread(program_name)
+            self.thread.uninstall_finished.connect(self.onUninstallFinished)
+            self.thread.start()
+        else:
+            QMessageBox.information(self, 'Uninstall', 'All selected programs have been uninstalled')
+
+    def onUninstallFinished(self, program_name, success):
+        for i in range(self.scriptsListWidget.count()):
+            item = self.scriptsListWidget.item(i)
+            if item.text().startswith(program_name):
+                if success:
+                    item.setBackground(Qt.green)
+                    item.setText(f"{program_name} (Uninstalled)")
+                else:
+                    item.setBackground(Qt.red)
+                    item.setText(f"{program_name} (Failed)")
+                break
+        self.uninstallNext()
 
     def updateCounterLabel(self):
         self.counterLabel.setText(f'Installed: {self.installCounter}/{self.totalPrograms}')
