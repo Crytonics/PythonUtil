@@ -97,6 +97,17 @@ class App(QWidget):
         self.setLayout(layout)
         self.loadFolders()
 
+        # New Tab
+        self.newTab = QWidget()
+        self.tabWidget.addTab(self.newTab, "Scripts")
+
+        newTabLayout = QVBoxLayout()
+        self.newTab.setLayout(newTabLayout)
+        
+        # Add new list to the "Scripts" tab
+        self.scriptsListWidget = QListWidget()
+        newTabLayout.addWidget(self.scriptsListWidget)
+
     def updateCounterLabel(self):
         self.counterLabel.setText(f'Installed: {self.installCounter}/{self.totalPrograms}')
 
