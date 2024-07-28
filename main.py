@@ -36,7 +36,6 @@ class InstallThread(QThread):
         self.program_name = program_name
         
     def run(self):
-        import subprocess
         try:
             subprocess.run(self.program_path, shell=True, check=True)
             self.install_finished.emit(self.program_name, True)
