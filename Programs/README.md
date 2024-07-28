@@ -1,0 +1,1 @@
+Here put folder for category (like "Programming") and then put another folder inside of this folder (Programming).
