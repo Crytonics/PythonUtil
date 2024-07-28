@@ -105,6 +105,28 @@ class App(QWidget):
         else:
             QMessageBox.warning(self, 'No Selection', 'Please select programs to install')
 
+    def installNext(self):
+        if self.installQueue:
+            item = self.installQueue.pop(0)
+            program_name = item.text()
+            program_folder = os.path.join('Programs', program_name)
+            exe_files = [f for f in os.listdir(program_folder) if f.endswith('.exe')]
+
+            if exe_files:
+                program_path = os.path.join(program_folder, exe_files[0])
+
+                self.thread = InstallThread(program_path, program_name)
+                self.thread.install_finished.connect(self.onInstallFinished)
+                self.thread.start()
+            else:
+                QMessageBox.warning(self, 'File Not Found', f'No .exe file found in {program_name} folder')
+                self.installNext()  # Continue with the next item
+        else:
+            if self.all_installed_successfully:
+                QMessageBox.information(self, 'Install', 'All selected programs have been installed')
+            else:
+                QMessageBox.warning(self, 'Install', 'Some programs failed to install')
+
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
