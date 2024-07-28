@@ -220,18 +220,20 @@ class App(QWidget):
             msi_files = [f for f in os.listdir(program_folder) if f.endswith('.msi')]
             msix_files = [f for f in os.listdir(program_folder) if f.endswith('.msix')]
 
-            if exe_files or msi_files or msix_files:
-                program_path = os.path.join(program_folder, exe_files[0] if exe_files else (msi_files[0] if msi_files else msix_files[0]))
-                pyautogui_script = os.path.join('functions', 'automate', f'auto_{program_name}.py')
-                
-                self.thread = InstallThread(program_path, program_name)
-                self.thread.install_finished.connect(self.onInstallFinished)
-                self.thread.start()
+            all_files = exe_files + msi_files + msix_files
 
-                # Check for and run the corresponding pyautogui script with elevated privileges
-                pyautogui_script = os.path.join('functions', 'automate', f'auto_{program_name}.py')
-                if os.path.isfile(pyautogui_script):
-                    subprocess.Popen([sys.executable, pyautogui_script])
+            if all_files:
+                for file in all_files:
+                    program_path = os.path.join(program_folder, file)
+                    self.thread = InstallThread(program_path, program_name)
+                    self.thread.install_finished.connect(self.onInstallFinished)
+                    self.thread.start()
+                    self.thread.wait()  # Wait for the current installation to finish before starting the next
+
+                    # Check for and run the corresponding pyautogui script with elevated privileges
+                    pyautogui_script = os.path.join('functions', 'automate', f'auto_{program_name}.py')
+                    if os.path.isfile(pyautogui_script):
+                        subprocess.Popen([sys.executable, pyautogui_script])
             else:
                 QMessageBox.warning(self, 'File Not Found', f'No .exe, .msi, or .msix file found in {program_name} folder')
                 self.installNext()  # Continue with the next item
