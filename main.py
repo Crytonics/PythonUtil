@@ -128,6 +128,11 @@ class App(QWidget):
 
         newTabLayout = QVBoxLayout()
         self.newTab.setLayout(newTabLayout)
+
+        # Add "Select All" checkbox for uninstalling programs
+        self.uninstallSelectAllCheckbox = QCheckBox('Select All')
+        self.uninstallSelectAllCheckbox.stateChanged.connect(self.selectAllUninstall)
+        newTabLayout.addWidget(self.uninstallSelectAllCheckbox)
         
         # Add new list to the "Uninstall Programs" tab
         self.scriptsListWidget = QListWidget()
@@ -247,6 +252,11 @@ class App(QWidget):
             item = self.listWidget.item(i)
             if item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:  # Check if the item is not marked as installed and is not a category
                 item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+
+    def selectAllUninstall(self, state):
+        for i in range(self.scriptsListWidget.count()):
+            item = self.scriptsListWidget.item(i)
+            item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
