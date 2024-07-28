@@ -75,6 +75,11 @@ class App(QWidget):
         self.listWidget = QListWidget()
         installLayout.addWidget(self.listWidget)
 
+        # Add install button
+        self.installButton = QPushButton('Install Selected')
+        self.installButton.clicked.connect(self.installSelected)
+        installLayout.addWidget(self.installButton)
+
         self.installTab.setLayout(installLayout)
         self.setLayout(layout)
         self.loadFolders()
@@ -87,6 +92,18 @@ class App(QWidget):
             item = QListWidgetItem(folder)
             item.setCheckState(Qt.Unchecked)
             self.listWidget.addItem(item)
+
+    def installSelected(self):
+        selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
+        if selected_items:
+            self.installQueue = selected_items
+            self.progressBar.setMaximum(100)
+            self.progressBar.setValue(0)
+            self.increment = 100 / len(selected_items)  # Calculate increment based on the number of selected items
+            self.updateCounterLabel()  # Update the counter label initially
+            self.installNext()
+        else:
+            QMessageBox.warning(self, 'No Selection', 'Please select programs to install')
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
