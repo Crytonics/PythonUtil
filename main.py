@@ -72,6 +72,11 @@ class App(QWidget):
 
         installLayout.addLayout(hLayout)
 
+        # Add "Select All" checkbox
+        self.selectAllCheckbox = QCheckBox('Select All')
+        self.selectAllCheckbox.stateChanged.connect(self.selectAll)
+        hLayout.addWidget(self.selectAllCheckbox)
+
         self.counterLabel = QLabel('Installed: 0/0')
         hLayout.addWidget(self.counterLabel)
 
@@ -104,6 +109,11 @@ class App(QWidget):
             item.setCheckState(Qt.Unchecked)
             self.listWidget.addItem(item)
         self.updateCounterLabel()  # Update the counter label after loading folders
+
+    def selectAll(self, state):
+        for i in range(self.listWidget.count()):
+            item = self.listWidget.item(i)
+            item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
