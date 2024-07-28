@@ -1,0 +1,1 @@
+In here you need to put folder with name of program (PeaZip), and then put exe inside of that folder.
