@@ -158,6 +158,10 @@ class App(QWidget):
                 list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
                 list_item.setCheckState(Qt.Unchecked)
                 self.scriptsListWidget.addItem(list_item)
+                if not self.is_program_installed_for_uninstall(item['name']):
+                    list_item.setBackground(Qt.green)
+                    list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                    list_item.setText(f"        {item['name']} (Not Installed)")  # Indent the program name and checkbox
 
     def uninstallSelected(self):
         selected_items = [self.scriptsListWidget.item(i) for i in range(self.scriptsListWidget.count()) if self.scriptsListWidget.item(i).checkState() == Qt.Checked]
@@ -194,6 +198,8 @@ class App(QWidget):
             if item.text().startswith(program_name):
                 if success:
                     item.setBackground(Qt.green)
+                    item.setCheckState(Qt.Unchecked)
+                    item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
                     item.setText(f"{program_name} (Uninstalled)")
                 else:
                     item.setBackground(Qt.red)
@@ -247,6 +253,20 @@ class App(QWidget):
                         pass
         return False
 
+    def is_program_installed_for_uninstall(self, program_name):
+        uninstall_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+        with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, uninstall_key) as key:
+            for i in range(0, winreg.QueryInfoKey(key)[0]):
+                sub_key_name = winreg.EnumKey(key, i)
+                with winreg.OpenKey(key, sub_key_name) as sub_key:
+                    try:
+                        display_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
+                        if program_name.lower() in display_name.lower():
+                            return True
+                    except FileNotFoundError:
+                        pass
+        return False
+    
     def selectAll(self, state):
         for i in range(self.listWidget.count()):
             item = self.listWidget.item(i)
@@ -256,7 +276,8 @@ class App(QWidget):
     def selectAllUninstall(self, state):
         for i in range(self.scriptsListWidget.count()):
             item = self.scriptsListWidget.item(i)
-            item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+            if item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:
+                item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
