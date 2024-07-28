@@ -85,6 +85,7 @@ class App(QWidget):
         self.totalPrograms = len(folders)  # Set the total number of programs
         for folder in folders:
             item = QListWidgetItem(folder)
+            item.setCheckState(Qt.Unchecked)
             self.listWidget.addItem(item)
 
 if __name__ == '__main__':
