@@ -80,6 +80,11 @@ class App(QWidget):
         self.installButton.clicked.connect(self.installSelected)
         installLayout.addWidget(self.installButton)
 
+        # Add progress bar
+        self.progressBar = QProgressBar()
+        installLayout.addWidget(self.progressBar)
+        self.progressBar.setValue(0)
+
         self.installTab.setLayout(installLayout)
         self.setLayout(layout)
         self.loadFolders()
@@ -143,6 +148,8 @@ class App(QWidget):
                     QMessageBox.warning(self, 'Install', f'Installing {program_name} failed')
                     self.all_installed_successfully = False  # Set flag to False if any installation fails
                 break
+            self.progressBar.setValue(self.progressBar.value() + int(self.increment))
+            self.installNext()  # Continue with the next item
 
 if __name__ == '__main__':
     app = QApplication(sys.argv)
