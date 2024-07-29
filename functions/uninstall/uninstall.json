@@ -1,35 +1,38 @@
 [
     {
-        "name": "Skype"
+        "name": "Skype",
+        "name_program": "Skype"
     },
     {
-        "name": "Xbox"
+        "name": "Microsoft.XboxApp",
+        "name_program": "Xbox"
     },
     {
-        "name": "Xbox live"
+        "name": "Microsoft.549981C3F5F10",
+        "name_program": "Cortana"
     },
     {
-        "name": "Cortana"
+        "name": "Microsoft.ZuneVideo",
+        "name_program": "Filmovi i TV"
     },
     {
-        "name": "Filmovi i TV"
+        "name": "Microsoft.MicrosoftOfficeHub",
+        "name_program": "Micorsoft 365 (Office)"
     },
     {
-        "name": "Micorsoft 365 (Office)"
+        "name": "Microsoft.MicrosoftSolitaireCollection",
+        "name_program": "Microsoft Solitaire Collection"
     },
     {
-        "name": "Microsoft OneDrive"
+        "name": "Microsoft.Office.OneNote",
+        "name_program": "OneNote for Windows 10"
     },
     {
-        "name": "Microsoft Solitaire Collection"
+        "name": "Microsoft.People",
+        "name_program": "Osobe"
     },
     {
-        "name": "OneNote for Windows 10"
-    },
-    {
-        "name": "Osobe"
-    },
-    {
-        "name": "Centar za povratne informacije"
+        "name": "Microsoft.WindowsFeedbackHub",
+        "name_program": "Centar za povratne informacije"
     }
 ]

@@ -22,27 +22,41 @@ def get_uninstall_command(program_name):
                         pass
     return None
 
-def uninstall_program(program_name):
-    uninstall_command = get_uninstall_command(program_name)
-    if uninstall_command:
-        try:
-            subprocess.run(uninstall_command, shell=True, check=True)
+def uninstall_appx_package(program_name):
+    ps_command = f"Get-AppxPackage *{program_name}* | Remove-AppxPackage"
+    result = subprocess.run(["powershell", "-Command", ps_command], capture_output=True, text=True, shell=True)
+    return result.returncode == 0 and not result.stderr.strip()
+
+def uninstall_program(program_name, is_appx_package):
+    if is_appx_package:
+        success = uninstall_appx_package(program_name)
+        if success:
             print(f"{program_name} uninstalled successfully.")
-            return True
-        except subprocess.CalledProcessError:
+        else:
             print(f"Failed to uninstall {program_name}.")
-            return False
+        return success
     else:
-        print(f"Uninstall command for {program_name} not found.")
-        return False
+        uninstall_command = get_uninstall_command(program_name)
+        if uninstall_command:
+            try:
+                subprocess.run(uninstall_command, shell=True, check=True)
+                print(f"{program_name} uninstalled successfully.")
+                return True
+            except subprocess.CalledProcessError:
+                print(f"Failed to uninstall {program_name}.")
+                return False
+        else:
+            print(f"Uninstall command for {program_name} not found.")
+            return False
 
 def main():
-    if len(sys.argv) > 1:
+    if len(sys.argv) > 2:
         program_name = sys.argv[1]
-        success = uninstall_program(program_name)
+        is_appx_package = sys.argv[2].lower() == 'true'
+        success = uninstall_program(program_name, is_appx_package)
         sys.exit(0 if success else 1)
     else:
-        print("No program name provided.")
+        print("No program name or package type provided.")
         sys.exit(1)
 
 if __name__ == "__main__":
