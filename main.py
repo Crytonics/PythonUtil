@@ -93,6 +93,18 @@ class App(QWidget):
         self.tabWidget = QTabWidget()
         layout.addWidget(self.tabWidget)
 
+        # New Tab
+        self.policies = QWidget()
+        self.tabWidget.addTab(self.policies, "Policies")
+
+        PoliciesLayout = QVBoxLayout()
+        self.policies.setLayout(PoliciesLayout)
+
+        # Add policies button
+        self.policiesButton = QPushButton('Apply Policies')
+        self.policiesButton.clicked.connect(self.applyPolicies)
+        PoliciesLayout.addWidget(self.policiesButton)
+
         self.installTab = QWidget()
         self.tabWidget.addTab(self.installTab, "Install Programs")
 
@@ -291,6 +303,10 @@ class App(QWidget):
             item = self.scriptsListWidget.item(i)
             if item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:
                 item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+
+    def applyPolicies(self):
+        subprocess.run([sys.executable, 'scripts/policies.py'])
+        QMessageBox.information(self, 'Policies Applied', 'Policies have been successfully applied.')
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
