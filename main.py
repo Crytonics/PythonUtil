@@ -305,8 +305,10 @@ class App(QWidget):
                 item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
     def applyPolicies(self):
-        subprocess.run([sys.executable, 'scripts/policies.py'])
-        QMessageBox.information(self, 'Policies Applied', 'Policies have been successfully applied.')
+        reply = QMessageBox.question(self, 'Confirm', 'Are you sure you want to apply policies?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            subprocess.run([sys.executable, 'scripts/policies.py'])
+            QMessageBox.information(self, 'Policies Applied', 'Policies have been successfully applied.')
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
