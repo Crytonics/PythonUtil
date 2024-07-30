@@ -100,9 +100,14 @@ class App(QWidget):
         PoliciesLayout = QVBoxLayout()
         self.policies.setLayout(PoliciesLayout)
 
-        # Add policies button
+        # Add apply policies button
         self.policiesButton = QPushButton('Apply Policies')
         self.policiesButton.clicked.connect(self.applyPolicies)
+        PoliciesLayout.addWidget(self.policiesButton)
+
+        # Add revert policies button
+        self.policiesButton = QPushButton('Revert Policies')
+        self.policiesButton.clicked.connect(self.revertPolicies)
         PoliciesLayout.addWidget(self.policiesButton)
 
         self.installTab = QWidget()
@@ -307,8 +312,14 @@ class App(QWidget):
     def applyPolicies(self):
         reply = QMessageBox.question(self, 'Confirm', 'Are you sure you want to apply policies?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
-            subprocess.run([sys.executable, 'scripts/policies.py'])
+            subprocess.run([sys.executable, 'scripts/policies.py', 'apply'])
             QMessageBox.information(self, 'Policies Applied', 'Policies have been successfully applied.')
+
+    def revertPolicies(self):
+        reply = QMessageBox.question(self, 'Confirm', 'Are you sure you want to revert policies?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
+        if reply == QMessageBox.Yes:
+            subprocess.run([sys.executable, 'scripts/policies.py', 'revert'])
+            QMessageBox.information(self, 'Policies Reverted', 'Policies have been successfully reverted.')
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]

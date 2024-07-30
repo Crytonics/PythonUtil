@@ -3,168 +3,196 @@
         "regPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Search",
         "regName": "AllowCortana",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\WindowsInkWorkspace",
         "regName": "AllowWindowsInkWorkspace",
         "regValue": 0,
+        "regValueRevert": 1,
         "type": "DWORD"
     },
     {
         "regPath": "HKLM:\\SOFTWARE\\Policies\\Microsoft\\Windows\\Windows Feeds",
         "regName": "EnableFeeds",
         "regValue": 0,
+        "regValueRevert": 1,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingColorScheme",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingTheme",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingVisualStyle",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingFontSize",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingColorAndAppearance",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingDesktopBackground",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingDesktopIcons",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingMousePointers",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Personalization",
         "regName": "NoChangingScreenSaver",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop",
         "regName": "ScreenSaverIsSecure",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop",
         "regName": "Wallpaper",
         "regValue": "C:\\Users\\Admin\\Pictures\\veleri-background.png",
+        "regValueRevert": "",
         "type": "String"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop",
         "regName": "WallpaperStyle",
         "regValue": 6,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Control Panel\\Desktop",
         "regName": "TileWallpaper",
         "regValue": 0,
+        "regValueRevert": 1,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\Advanced\\People",
         "regName": "PeopleBand",
         "regValue": 0,
+        "regValueRevert": 1,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "TaskbarLockAll",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "LockedStartLayout",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoChangeStartMenu",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoPinningToTaskbar",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "LockTaskbar",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoToolbarsOnTaskbar",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoMovingBands",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoCloseDragDropBands",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoResizeTaskbar",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoStartMenuMorePrograms",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     },
     {
         "regPath": "HKCU:\\Software\\Policies\\Microsoft\\Windows\\Explorer",
         "regName": "NoChangeStartMenuBackground",
         "regValue": 1,
+        "regValueRevert": 0,
         "type": "DWORD"
     }
 ]
