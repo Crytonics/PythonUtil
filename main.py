@@ -4,6 +4,10 @@ import subprocess
 import winreg
 import ctypes
 import json
+import logging
+
+# Configure logging
+logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def is_admin():
     try:
@@ -17,6 +21,7 @@ if not is_admin():
     sys.exit()
 
 def check_and_install_requirements():
+    logging.info("\n\nAPPLICATION STARTED")
     try:
         import pkg_resources
     except ImportError:
@@ -51,13 +56,21 @@ class InstallThread(QThread):
         
     def run(self):
         try:
+            logging.info(f"Starting installation of {self.program_name}")
+            print(f"Starting installation of {self.program_name}")
             subprocess.run(self.program_path, shell=True, check=True)
             self.install_finished.emit(self.program_name, True)
+            logging.info(f"Successfully installed {self.program_name}")
+            print(f"Successfully installed {self.program_name}")
         except subprocess.CalledProcessError:
             self.install_finished.emit(self.program_name, False)
+            logging.error(f"Failed to install {self.program_name}")
+            print(f"Failed to install {self.program_name}")
         except OSError as e:
             if e.winerror == 740:
                 self.install_finished.emit(self.program_name, False)
+                logging.error(f"Failed to install {self.program_name} due to insufficient permissions")
+                print(f"Failed to install {self.program_name} due to insufficient permissions")
             else:
                 raise
 
@@ -71,12 +84,22 @@ class UninstallThread(QThread):
 
     def run(self):
         try:
+            logging.info(f"Starting uninstallation of {self.program_name}")
+            print(f"Starting uninstallation of {self.program_name}")
             result = subprocess.run([sys.executable, 'scripts/uninstall.py', self.program_name, str(self.is_appx_package).lower()])
             success = (result.returncode == 0)
             self.uninstall_finished.emit(self.program_name, success)
+            if success:
+                logging.info(f"Successfully uninstalled {self.program_name}")
+                print(f"Successfully uninstalled {self.program_name}")
+            else:
+                logging.error(f"Failed to uninstall {self.program_name}")
+                print(f"Failed to uninstall {self.program_name}")
         except Exception as e:
             self.uninstall_finished.emit(self.program_name, False)
-        
+            logging.error(f"Exception occurred while uninstalling {self.program_name}: {e}")
+            print(f"Exception occurred while uninstalling {self.program_name}: {e}")
+
 class App(QWidget):
     def __init__(self):
         super().__init__()
@@ -173,6 +196,7 @@ class App(QWidget):
     def is_appx_package_installed(self, app_name):
         ps_command = f"Get-AppxPackage *{app_name}*"
         result = subprocess.run(["powershell", "-Command", ps_command], capture_output=True, text=True, shell=True)
+        logging.info(f"Checking if appx package {app_name} is installed: {bool(result.stdout.strip())}")
         print(f"Checking if appx package {app_name} is installed: {bool(result.stdout.strip())}")
         return bool(result.stdout.strip())
 
@@ -312,14 +336,22 @@ class App(QWidget):
     def applyPolicies(self):
         reply = QMessageBox.question(self, 'Confirm', 'Are you sure you want to apply policies?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            logging.info("Applying policies")
+            print("Applying policies")
             subprocess.run([sys.executable, 'scripts/policies.py', 'apply'])
             QMessageBox.information(self, 'Policies Applied', 'Policies have been successfully applied.')
+            logging.info("Policies applied successfully")
+            print("Policies applied successfully")
 
     def revertPolicies(self):
         reply = QMessageBox.question(self, 'Confirm', 'Are you sure you want to revert policies?', QMessageBox.Yes | QMessageBox.No, QMessageBox.No)
         if reply == QMessageBox.Yes:
+            logging.info("Reverting policies")
+            print("Reverting policies")
             subprocess.run([sys.executable, 'scripts/policies.py', 'revert'])
             QMessageBox.information(self, 'Policies Reverted', 'Policies have been successfully reverted.')
+            logging.info("Policies reverted successfully")
+            print("Policies reverted successfully")
 
     def installSelected(self):
         selected_items = [self.listWidget.item(i) for i in range(self.listWidget.count()) if self.listWidget.item(i).checkState() == Qt.Checked]
@@ -381,12 +413,18 @@ class App(QWidget):
                     if os.path.isfile(pyautogui_script):
                         subprocess.Popen([sys.executable, pyautogui_script])
             else:
+                logging.warning(f'No .exe, .msi, or .msix file found in {program_name} folder')
+                print(f'No .exe, .msi, or .msix file found in {program_name} folder')
                 QMessageBox.warning(self, 'File Not Found', f'No .exe, .msi, or .msix file found in {program_name} folder')
                 self.installNext()  # Continue with the next item
         else:
             if self.all_installed_successfully:
+                logging.info('All selected programs have been installed')
+                print('All selected programs have been installed')
                 QMessageBox.information(self, 'Install', 'All selected programs have been installed')
             else:
+                logging.warning('Some programs failed to install')
+                print('Some programs failed to install')
                 QMessageBox.warning(self, 'Install', 'Some programs failed to install')
             self.progressBar.setValue(100)  # Ensure progress bar is set to 100% when done
 

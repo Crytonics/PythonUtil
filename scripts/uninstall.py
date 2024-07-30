@@ -2,6 +2,10 @@ import json
 import winreg
 import subprocess
 import sys
+import logging
+
+# Configure logging
+logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
 def get_uninstall_command(program_name):
     uninstall_keys = [
@@ -31,8 +35,10 @@ def uninstall_program(program_name, is_appx_package):
     if is_appx_package:
         success = uninstall_appx_package(program_name)
         if success:
+            logging.info(f"{program_name} uninstalled successfully.")
             print(f"{program_name} uninstalled successfully.")
         else:
+            logging.info(f"Failed to uninstall {program_name}.")
             print(f"Failed to uninstall {program_name}.")
         return success
     else:
@@ -40,12 +46,15 @@ def uninstall_program(program_name, is_appx_package):
         if uninstall_command:
             try:
                 subprocess.run(uninstall_command, shell=True, check=True)
+                logging.info(f"{program_name} uninstalled successfully.")
                 print(f"{program_name} uninstalled successfully.")
                 return True
             except subprocess.CalledProcessError:
+                logging.info(f"Failed to uninstall {program_name}.")
                 print(f"Failed to uninstall {program_name}.")
                 return False
         else:
+            logging.info(f"Uninstall command for {program_name} not found.")
             print(f"Uninstall command for {program_name} not found.")
             return False
 
@@ -56,6 +65,7 @@ def main():
         success = uninstall_program(program_name, is_appx_package)
         sys.exit(0 if success else 1)
     else:
+        logging.info("No program name or package type provided.")
         print("No program name or package type provided.")
         sys.exit(1)
 
