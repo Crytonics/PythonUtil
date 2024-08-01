@@ -1,3 +1,6 @@
 *.exe
+*.msi
+*.msix
+*.jar
 
 log.txt
