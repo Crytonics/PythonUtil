@@ -1,0 +1,87 @@
+{
+    "Microsoft NET 5-7": {
+        "category": "Instalacija dodataka",
+        "Name": "Microsoft NET 5-7",
+        "winget": "Microsoft.DotNet.SDK.5, Microsoft.DotNet.SDK.6, Microsoft.DotNet.SDK.7"
+    },
+    "Microsoft Vc++ 2015-2022 32-bit": {
+        "category": "Instalacija dodataka",
+        "Name": "Microsoft Vc++ 2015-2022 32-bit",
+        "winget": "Microsoft.VCRedist.2015+.x86"
+    },
+    "Microsoft Vc++ 2015-2022 64-bit": {
+        "category": "Instalacija dodataka",
+        "Name": "Microsoft Vc++ 2015-2022 64-bit",
+        "winget": "Microsoft.VCRedist.2015+.x64"
+    },
+    "Python": {
+        "category": "Instalacija dodataka",
+        "Name": "Python",
+        "winget": "Python.Python.3.11"
+    },
+    "Node.js": {
+        "category": "Instalacija dodataka",
+        "Name": "Node.js",
+        "winget": "OpenJS.NodeJS"
+    },
+    "Java 8": {
+        "category": "Instalacija dodataka",
+        "Name": "Java 8",
+        "winget": "Oracle.JavaRuntimeEnvironment"
+    },
+    "Java SE 19": {
+        "category": "Instalacija dodataka",
+        "Name": "Java SE 19",
+        "winget": "Oracle.JDK.19"
+    },
+    "Git": {
+        "category": "Instalacija dodataka",
+        "Name": "Git",
+        "winget": "Git.Git"
+    },
+    "Adobe Acrobat Reader": {
+        "category": "Instalacija programa",
+        "Name": "Adobe Acrobat Reader",
+        "winget": "Adobe.Acrobat.Reader.64-bit"
+    },
+    "Draw.io": {
+        "category": "Instalacija programa",
+        "Name": "Draw.io",
+        "winget": "JGraph.Draw"
+    },
+    "Embarcedero Dev-C++": {
+        "category": "Instalacija programa",
+        "Name": "Embarcedero Dev-C++",
+        "winget": "Embarcadero.Dev-C++"
+    },
+    "HeidiSQL": {
+        "category": "Instalacija programa",
+        "Name": "HeidiSQL",
+        "winget": "HeidiSQL.HeidiSQL"
+    },
+    "Visual Studio 2022": {
+        "category": "Instalacija programa",
+        "Name": "Visual Studio 2022",
+        "winget": "Microsoft.VisualStudio.2022.Community"
+    },
+    "Oracle VM VirtualBox": {
+        "category": "Instalacija programa",
+        "Name": "Oracle VM VirtualBox",
+        "winget": "Oracle.VirtualBox"
+    },
+    "QGIS": {
+        "category": "Instalacija programa",
+        "Name": "QGIS",
+        "winget": "OSGeo.QGIS"
+    },
+    "Shotcut": {
+        "category": "Instalacija programa",
+        "Name": "Shotcut",
+        "winget": "Meltytech.Shotcut"
+    },
+    "PowerBI": {
+        "category": "Instalacija programa",
+        "Name": "PowerBI",
+        "winget": "Microsoft.PowerBI"
+    }
+}
