@@ -107,6 +107,8 @@ try:
             self.all_installed_successfully = True  # Flag to track installation success
             self.installCounter = 0  # Initialize the counter
             self.totalPrograms = 0  # Initialize the total number of programs
+            self.totalProgramsWinget = 0  # Initialize the total number of programs
+            self.installedCountWinget = 0  # Initialize the installed count
             self.initUI()  # Call initUI after initializing attributes
 
         def initUI(self):
@@ -194,6 +196,43 @@ try:
             self.installTab.setLayout(installLayout)
             self.setLayout(layout)
             self.loadFolders()
+
+            # New Tab (IWinget Intall)
+            self.wingetTab = QWidget()
+            self.tabWidget.addTab(self.wingetTab, "Winget Install")
+
+            WingetLayout = QVBoxLayout()
+            WingethLayout = QHBoxLayout()
+
+            WingetLayout.addLayout(WingethLayout)
+
+            self.listWidgetWinget = QListWidget()
+            WingetLayout.addWidget(self.listWidgetWinget)
+            
+            # Add "Select All" checkbox
+            self.selectAllCheckboxWinget = QCheckBox('Select All')
+            self.selectAllCheckboxWinget.stateChanged.connect(self.selectAllWinget)
+            WingethLayout.addWidget(self.selectAllCheckboxWinget)
+
+            self.selectAllCheckboxWinget.stateChanged.connect(self.selectAllWinget)
+            self.listWidgetWinget.itemChanged.connect(self.onItemChangedWinget)
+
+            self.counterLabelWinget = QLabel('Installed: 0/0')
+            WingethLayout.addWidget(self.counterLabelWinget)
+
+            # Add install button
+            self.installButtonWinget = QPushButton('Install Selected')
+            self.installButtonWinget.clicked.connect(self.installSelectedWinget)
+            WingetLayout.addWidget(self.installButtonWinget)
+
+            # Add progress bar
+            self.progressBarWinget = QProgressBar()
+            WingetLayout.addWidget(self.progressBarWinget)
+            self.progressBarWinget.setValue(0)
+
+            self.wingetTab.setLayout(WingetLayout)
+            self.setLayout(layout)
+            self.loadWingetData()
 
         def is_appx_package_installed(self, app_name):
             ps_command = f"Get-AppxPackage *{app_name}*"
@@ -295,19 +334,38 @@ try:
 
             self.updateCounterLabel()  # Update the counter label after loading folders
 
+        # //OLD WAY OF CHECKING INSTALLED PROGRAMS
+        # def is_program_installed(self, program_name):
+        #     uninstall_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
+        #     with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, uninstall_key) as key:
+        #         for i in range(0, winreg.QueryInfoKey(key)[0]):
+        #             sub_key_name = winreg.EnumKey(key, i)
+        #             with winreg.OpenKey(key, sub_key_name) as sub_key:
+        #                 try:
+        #                     display_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
+        #                     if program_name.lower() in display_name.lower():
+        #                         return True
+        #                 except FileNotFoundError:
+        #                     pass
+        #     return False
+        
         def is_program_installed(self, program_name):
-            uninstall_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
-            with winreg.OpenKey(winreg.HKEY_LOCAL_MACHINE, uninstall_key) as key:
-                for i in range(0, winreg.QueryInfoKey(key)[0]):
-                    sub_key_name = winreg.EnumKey(key, i)
-                    with winreg.OpenKey(key, sub_key_name) as sub_key:
-                        try:
-                            display_name = winreg.QueryValueEx(sub_key, "DisplayName")[0]
-                            if program_name.lower() in display_name.lower():
-                                return True
-                        except FileNotFoundError:
-                            pass
-            return False
+            if not hasattr(self, 'installed_programs'):
+                try:
+                    print("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
+                    logging.info("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
+                    result = subprocess.run(["winget", "list"], capture_output=True, text=True, check=True)
+                    self.installed_programs = result.stdout.lower()
+                except subprocess.CalledProcessError:
+                    self.installed_programs = ""
+            
+            if program_name.lower() in self.installed_programs:
+                print(f"***[Checking Installed Programs]*** {program_name} is installed")
+                logging.info(f"***[Checking Installed Programs]*** {program_name} is installed")
+            else:
+                print(f"***[Checking Installed Programs]*** {program_name} is not installed")
+                logging.info(f"***[Winget]*** {program_name} is not installed")
+            return program_name.lower() in self.installed_programs
 
         def is_program_installed_for_uninstall(self, program_name):
             uninstall_key = r"SOFTWARE\Microsoft\Windows\CurrentVersion\Uninstall"
@@ -463,6 +521,111 @@ try:
             self.progressBar.setValue(self.progressBar.value() + int(self.increment))
             self.updateCounterLabel()  # Update the counter label after each installation
             self.installNext()  # Continue with the next item
+
+    
+        def loadWingetData(self):
+            with open('functions/install/winget.json', 'r', encoding='utf-8') as file:
+                self.winget_data = json.load(file)
+                self.totalProgramsWinget = len(self.winget_data)
+                self.updateCounterLabelWinget()
+                for program, details in self.winget_data.items():
+                    list_item = QListWidgetItem(details['Name'])
+                    list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
+                    list_item.setCheckState(Qt.Unchecked)
+                    list_item.setData(Qt.UserRole, program)  # Store the actual program name for installation
+                    if self.is_program_installed_winget(details['Name']):
+                        list_item.setBackground(Qt.green)
+                        list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                        list_item.setText(f"{details['Name']} (Installed)")
+                        self.installedCountWinget += 1
+                        self.updateCounterLabelWinget()
+                    self.listWidgetWinget.addItem(list_item)
+                    
+        def is_program_installed_winget(self, program_name):
+            if not hasattr(self, 'installed_programs'):
+                try:
+                    print("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
+                    logging.info("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
+                    result = subprocess.run(["winget", "list"], capture_output=True, text=True, check=True)
+                    self.installed_programs = result.stdout.lower()
+                except subprocess.CalledProcessError:
+                    self.installed_programs = ""
+            
+            if program_name.lower() in self.installed_programs:
+                print(f"***[Checking Installed Programs]*** {program_name} is installed")
+                logging.info(f"***[Checking Installed Programs]*** {program_name} is installed")
+            else:
+                print(f"***[Checking Installed Programs]*** {program_name} is not installed")
+                logging.info(f"***[Checking Installed Programs]*** {program_name} is not installed")
+            return program_name.lower() in self.installed_programs
+
+        def selectAllWinget(self, state):
+            for i in range(self.listWidgetWinget.count()):
+                item = self.listWidgetWinget.item(i)
+                if item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:
+                    item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+
+        def onItemChangedWinget(self, item):
+            if item.background() == Qt.lightGray:  # Check if the item is a category
+                self.selectAllWinget(item)
+
+        def installSelectedWinget(self):
+            selected_items = [self.listWidgetWinget.item(i) for i in range(self.listWidgetWinget.count()) if self.listWidgetWinget.item(i).checkState() == Qt.Checked]
+            
+            if selected_items:
+                self.installQueueWinget = selected_items
+                self.progressBarWinget.setMaximum(100)
+                self.progressBarWinget.setValue(0)
+                self.incrementWinget = 100 / len(selected_items)  # Calculate increment based on the number of selected items
+                self.installedCountWinget = 0  # Initialize the installed count
+                self.totalSelectedWinget = len(selected_items)  # Total number of selected items
+                self.updateCounterLabelWinget()  # Update the counter label initially
+                self.installNextWinget()
+            else:
+                QMessageBox.warning(self, 'No Selection', 'Please select programs to install')
+
+        def installNextWinget(self):
+            if self.installQueueWinget:
+                item = self.installQueueWinget.pop(0)
+                program_name = item.data(Qt.UserRole)  # Retrieve the actual program name for installation
+                winget_command = self.winget_data[program_name]['winget']
+                ps_command = f"winget install {winget_command} --accept-package-agreements --accept-source-agreements"
+                try:
+                    logging.info(f"***[Winget]*** Installing {program_name} using winget")
+                    print(f"***[Winget]*** Installing {program_name} using winget")
+                    subprocess.run(["powershell", "-Command", ps_command], check=True)
+                    logging.info(f"***[Winget]*** Successfully installed {program_name}")
+                    print(f"***[Winget]*** Successfully installed {program_name}")
+                    self.onInstallFinishedWinget(program_name, True)
+                except subprocess.CalledProcessError:
+                    logging.error(f"***[Winget]*** Failed to install {program_name}")
+                    print(f"***[Winget]*** Failed to install {program_name}")
+                    self.onInstallFinishedWinget(program_name, False)
+            else:
+                QMessageBox.information(self, 'Install', 'All selected programs have been installed')
+                self.progressBarWinget.setValue(100)  # Ensure progress bar is set to 100% when done
+
+        def onInstallFinishedWinget(self, program_name, success):
+            for i in range(self.listWidgetWinget.count()):
+                item = self.listWidgetWinget.item(i)
+                item_text = item.text().strip()  # Remove leading and trailing spaces
+                if item_text == self.winget_data[program_name]['Name']:
+                    if success:
+                        item.setBackground(Qt.green)
+                        item.setCheckState(Qt.Unchecked)
+                        item.setFlags(item.flags() & ~Qt.ItemIsEnabled)
+                        item.setText(f"{item.text()} (Installed)")
+                        self.installedCountWinget += 1  # Increment the counter by 1
+                    else:
+                        item.setBackground(Qt.red)
+                        item.setText(f"{item.text()} (Failed)")
+                    break
+            self.progressBarWinget.setValue(self.progressBarWinget.value() + int(self.incrementWinget))
+            self.updateCounterLabelWinget()  # Update the counter label after each installation
+            self.installNextWinget()  # Continue with the next item
+        
+        def updateCounterLabelWinget(self):
+            self.counterLabelWinget.setText(f'Installed: {self.installedCountWinget}/{self.totalProgramsWinget}')
 
     if __name__ == '__main__':
         app = QApplication(sys.argv)
