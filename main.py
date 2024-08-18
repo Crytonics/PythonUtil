@@ -348,7 +348,7 @@ try:
         #                 except FileNotFoundError:
         #                     pass
         #     return False
-        
+
         def is_program_installed(self, program_name):
             if not hasattr(self, 'installed_programs'):
                 try:
@@ -528,19 +528,33 @@ try:
                 self.winget_data = json.load(file)
                 self.totalProgramsWinget = len(self.winget_data)
                 self.updateCounterLabelWinget()
+                
+                categories = {}
                 for program, details in self.winget_data.items():
-                    list_item = QListWidgetItem(details['Name'])
-                    list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
-                    list_item.setCheckState(Qt.Unchecked)
-                    list_item.setData(Qt.UserRole, program)  # Store the actual program name for installation
-                    if self.is_program_installed_winget(details['Name']):
-                        list_item.setBackground(Qt.green)
-                        list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
-                        list_item.setText(f"{details['Name']} (Installed)")
-                        self.installedCountWinget += 1
-                        self.updateCounterLabelWinget()
-                    self.listWidgetWinget.addItem(list_item)
+                    category = details['category']
+                    if category not in categories:
+                        categories[category] = []
+                    categories[category].append(details)
+                
+                for category, programs in categories.items():
+                    category_item = QListWidgetItem(category)
+                    category_item.setFlags(category_item.flags() & ~Qt.ItemIsUserCheckable)  # Disable the checkbox for the category item
+                    category_item.setBackground(Qt.lightGray)
+                    self.listWidgetWinget.addItem(category_item)
                     
+                    for details in programs:
+                        list_item = QListWidgetItem(details['Name'])
+                        list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
+                        list_item.setCheckState(Qt.Unchecked)
+                        list_item.setData(Qt.UserRole, details['Name'])  # Store the actual program name for installation
+                        if self.is_program_installed_winget(details['Name']):
+                            list_item.setBackground(Qt.green)
+                            list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                            list_item.setText(f"{details['Name']} (Installed)")
+                            self.installedCountWinget += 1
+                            self.updateCounterLabelWinget()
+                        self.listWidgetWinget.addItem(list_item)
+        
         def is_program_installed_winget(self, program_name):
             if not hasattr(self, 'installed_programs'):
                 try:
@@ -562,12 +576,23 @@ try:
         def selectAllWinget(self, state):
             for i in range(self.listWidgetWinget.count()):
                 item = self.listWidgetWinget.item(i)
+                if item.background() == Qt.lightGray:  # Check if the item is a category
+                    self.categorySelectAllWinget(item, state)
+                elif item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:
+                    item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
+
+        def categorySelectAllWinget(self, category_item, state):
+            category_index = self.listWidgetWinget.row(category_item)
+            for i in range(category_index + 1, self.listWidgetWinget.count()):
+                item = self.listWidgetWinget.item(i)
+                if item.background() == Qt.lightGray:  # Stop if another category is encountered
+                    break
                 if item.background() != Qt.green and item.flags() & Qt.ItemIsEnabled:
                     item.setCheckState(Qt.Checked if state == Qt.Checked else Qt.Unchecked)
 
         def onItemChangedWinget(self, item):
             if item.background() == Qt.lightGray:  # Check if the item is a category
-                self.selectAllWinget(item)
+                self.categorySelectAllWinget(item)
 
         def installSelectedWinget(self):
             selected_items = [self.listWidgetWinget.item(i) for i in range(self.listWidgetWinget.count()) if self.listWidgetWinget.item(i).checkState() == Qt.Checked]
