@@ -1,6 +1,9 @@
+# Files
 *.exe
 *.msi
 *.msix
 *.jar
-
 log.txt
+
+# Folders
+__pycache__
