@@ -52,26 +52,29 @@ try:
                         list_item.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)  # Enable the checkbox for the item
                         list_item.setCheckState(Qt.Unchecked)
                         list_item.setData(Qt.UserRole, details['Name'])  # Store the actual program name for installation
-                        if self.is_program_installed_winget(details['Name']): 
-                            list_item.setBackground(Qt.green)
-                            list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
-                            list_item.setText(f"{details['Name']} (Installed)")
-                            self.installedCountWinget += 1
-                            self.updateCounterLabelWinget()
-                        self.listWidgetWinget.addItem(list_item)
-                        
+
                         # Create a new list item for the second list
                         list_item_copy = QListWidgetItem(details['Name'])
                         list_item_copy.setFlags(list_item.flags() | Qt.ItemIsUserCheckable)
                         list_item_copy.setCheckState(Qt.Unchecked)
                         list_item_copy.setData(Qt.UserRole, details['Name'])
+
                         if self.is_program_installed_winget(details['Name']): 
+                            list_item.setBackground(Qt.green)
+                            list_item.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
+                            list_item.setText(f"{details['Name']} (Installed)")
+
                             list_item_copy.setFlags(list_item.flags() | Qt.ItemIsEnabled)
                             list_item_copy.setText(f"{details['Name']} (Installed)")
+
+                            self.installedCountWinget += 1
+                            self.updateCounterLabelWinget()
                         else:
-                            list_item_copy.setBackground(Qt.lightGray)
+                            list_item_copy.setBackground(Qt.yellow)
                             list_item_copy.setFlags(list_item.flags() & ~Qt.ItemIsEnabled)
-                        self.listWidgetWingetUpdaUnins.addItem(list_item_copy)
+                        
+                        self.listWidgetWinget.addItem(list_item)
+                        self.listWidgetWingetUpdaUnins.addItem(list_item_copy)                
         except Exception as e:
             handle_exception(e)
 
