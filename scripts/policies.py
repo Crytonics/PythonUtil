@@ -5,6 +5,7 @@ import os
 from concurrent.futures import ThreadPoolExecutor
 import logging
 from PyQt5.QtWidgets import QMessageBox
+import pkg_resources
 
 # Configure logging
 logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -91,6 +92,20 @@ try:
             logging.info("Finished applying policies.")
             print("Finished applying policies.")
         except Exception as e:
+            handle_exception(e)
+
+    def installPythonModules(self):
+        try:
+            with open('functions/python/modules.txt', 'r') as file:
+                requirements = file.read().splitlines()
+                
+                installed_packages = {pkg.key for pkg in pkg_resources.working_set}
+                missing_packages = [pkg for pkg in requirements if pkg not in installed_packages]
+
+                if missing_packages:
+                    subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing_packages])
+
+        except Exception as e:  
             handle_exception(e)
 
 except Exception as e:

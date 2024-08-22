@@ -7,7 +7,7 @@ from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QLi
 
 from scripts.winget_manager import loadWingetData, is_program_installed_winget, selectAllWinget, selectAllWingetUpdaUnins, categorySelectAllWinget, categorySelectAllWingetUpdaUnins, onItemChangedWinget, onItemChangedWingetUpdaUnins, installSelectedWinget, installNextWinget, onInstallFinishedWinget, updateCounterLabelWinget, uninstallSelectedWingetUpdaUnins, uninstallNextWinget, onUninstallFinishedWinget, updateSelectedWingetUpdaUnins, updateNextWinget, onUpdateFinishedWinget
 from scripts.install_programs_manager import updateCounterLabel, loadFolders, is_program_installed, is_program_installed_for_uninstall, selectAll, selectAllUninstall, installSelected, categorySelectAll, onItemChanged, installNext, getCategoryForProgram, onInstallFinished
-from scripts.policies import applyPolicies, revertPolicies  # Import the methods from policies.py
+from scripts.policies import applyPolicies, revertPolicies, installPythonModules  # Import the methods from policies.py
 from scripts.uninstall import loadUninstallData, uninstallSelected, uninstallNext, onUninstallFinished  # Import methods from uninstall.py
 
 
@@ -82,22 +82,27 @@ class App(QWidget):
             self.tabWidget = QTabWidget()
             layout.addWidget(self.tabWidget)
 
-            # New Tab (Policies)
-            self.policies = QWidget()
-            self.tabWidget.addTab(self.policies, "Policies")
+            # New Tab (Scripts)
+            self.scripts = QWidget()
+            self.tabWidget.addTab(self.scripts, "Scripts")
 
-            PoliciesLayout = QVBoxLayout()
-            self.policies.setLayout(PoliciesLayout)
+            ScriptsLayout = QVBoxLayout()
+            self.scripts.setLayout(ScriptsLayout)
 
             # Add apply policies button
-            self.policiesButton = QPushButton('Apply Policies')
+            self.policiesButton = QPushButton('Apply group policies')
             self.policiesButton.clicked.connect(self.applyPolicies)
-            PoliciesLayout.addWidget(self.policiesButton)
+            ScriptsLayout.addWidget(self.policiesButton)
 
             # Add revert policies button
-            self.policiesButton = QPushButton('Revert Policies')
+            self.policiesButton = QPushButton('Revert group policies')
             self.policiesButton.clicked.connect(self.revertPolicies)
-            PoliciesLayout.addWidget(self.policiesButton)
+            ScriptsLayout.addWidget(self.policiesButton)
+
+            # Add revert policies button
+            self.policiesButton = QPushButton('Install python modules')
+            self.policiesButton.clicked.connect(self.installPythonModules)
+            ScriptsLayout.addWidget(self.policiesButton)
 
             # New Tab (Uninstall Programs)
             self.newTab = QWidget()
@@ -259,9 +264,10 @@ class App(QWidget):
         uninstallNext = uninstallNext
         onUninstallFinished = onUninstallFinished
         
-        # Import methods from policies
+        # Import methods from scripts
         applyPolicies = applyPolicies
         revertPolicies = revertPolicies
+        installPythonModules = installPythonModules
 
         # Import methods from program_manager
         updateCounterLabel = updateCounterLabel
