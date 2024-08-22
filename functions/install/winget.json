@@ -14,11 +14,6 @@
         "Name": "Microsoft Vc++ 2015-2022 64-bit",
         "winget": "Microsoft.VCRedist.2015+.x64"
     },
-    "Python": {
-        "category": "Instalacija dodataka",
-        "Name": "Python",
-        "winget": "Python.Python.3.11"
-    },
     "Node.js": {
         "category": "Instalacija dodataka",
         "Name": "Node.js",
