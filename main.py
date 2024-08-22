@@ -10,53 +10,64 @@ from scripts.install_programs_manager import updateCounterLabel, loadFolders, is
 from scripts.policies import applyPolicies, revertPolicies  # Import the methods from policies.py
 from scripts.uninstall import loadUninstallData, uninstallSelected, uninstallNext, onUninstallFinished  # Import methods from uninstall.py
 
-try:
-    # Configure logging
-    logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    def is_admin():
-        try:
-            return ctypes.windll.shell32.IsUserAnAdmin()
-        except:
-            return False
+# Configure logging
+logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
 
-    if not is_admin():
-        # Re-run the program with admin rights
-        ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
-        sys.exit()
+def is_admin():
+    try:
+        return ctypes.windll.shell32.IsUserAnAdmin()
+    except:
+        return False
 
-    def check_and_install_requirements():
-        logging.info("\n\nAPPLICATION STARTED")
-        try:
-            import pkg_resources
-        except ImportError:
-            subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools'])
-            import pkg_resources
+if not is_admin():
+    # Re-run the program with admin rights
+    ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
+    sys.exit()
 
-        subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
+def check_and_install_requirements():
+    logging.info("\n\nAPPLICATION STARTED")
+    try:
+        import pkg_resources
+    except ImportError:
+        subprocess.check_call([sys.executable, '-m', 'pip', 'install', 'setuptools'])
+        import pkg_resources
 
-        requirements_path = 'requirements.txt'
-        if os.path.isfile(requirements_path):
-            with open(requirements_path, 'r') as file:
-                requirements = file.read().splitlines()
-            
-            installed_packages = {pkg.key for pkg in pkg_resources.working_set}
-            missing_packages = [pkg for pkg in requirements if pkg not in installed_packages]
+    subprocess.check_call([sys.executable, '-m', 'pip', 'install', '--upgrade', 'pip'])
 
-            if missing_packages:
-                subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing_packages])
+    requirements_path = 'requirements.txt'
+    if os.path.isfile(requirements_path):
+        with open(requirements_path, 'r') as file:
+            requirements = file.read().splitlines()
+        
+        installed_packages = {pkg.key for pkg in pkg_resources.working_set}
+        missing_packages = [pkg for pkg in requirements if pkg not in installed_packages]
 
-    check_and_install_requirements()
+        if missing_packages:
+            subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing_packages])
 
-    class App(QWidget):
+check_and_install_requirements()
+
+class App(QWidget):
         def __init__(self):
-            super().__init__()
-            self.all_installed_successfully = True  # Flag to track installation success
-            self.installCounter = 0  # Initialize the counter
-            self.totalPrograms = 0  # Initialize the total number of programs
-            self.totalProgramsWinget = 0  # Initialize the total number of programs
-            self.installedCountWinget = 0  # Initialize the installed count
-            self.initUI()  # Call initUI after initializing attributes
+            try:
+                super().__init__()
+                self.all_installed_successfully = True  # Flag to track installation success
+                self.installCounter = 0  # Initialize the counter
+                self.totalPrograms = 0  # Initialize the total number of programs
+                self.totalProgramsWinget = 0  # Initialize the total number of programs
+                self.installedCountWinget = 0  # Initialize the installed count
+                self.initUI()  # Call initUI after initializing attributes
+            except Exception as e:
+                exc_type, exc_obj, exc_tb = sys.exc_info()
+                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+                line_number = exc_tb.tb_lineno
+                error_message = f"An error occurred in {fname} at line {line_number}: {e}"
+                
+                logging.error(error_message)
+                print(error_message)
+                QMessageBox.critical(None, "Error", error_message)
+                sys.exit(1)
 
         def initUI(self):
             self.setWindowTitle('Program Manager')
@@ -180,7 +191,7 @@ try:
             self.wingetTab.setLayout(WingetLayout)
             self.setLayout(layout)
             self.loadWingetData()
-        
+    
         # Import methods from uninstall
         loadUninstallData = loadUninstallData
         uninstallSelected = uninstallSelected
@@ -216,14 +227,8 @@ try:
         onInstallFinishedWinget = onInstallFinishedWinget
         updateCounterLabelWinget = updateCounterLabelWinget
 
-    if __name__ == '__main__':
-        app = QApplication(sys.argv)
-        ex = App()
-        ex.show()
-        sys.exit(app.exec_())
-
-except Exception as e:
-    logging.error("An error occurred: %s", e)
-    print("An error occurred: %s", e)
-    QMessageBox.critical(None, "Error", f"An error occurred: {e}")
-    sys.exit(1)
+if __name__ == '__main__':
+    app = QApplication(sys.argv)
+    ex = App()
+    ex.show()
+    sys.exit(app.exec_())
