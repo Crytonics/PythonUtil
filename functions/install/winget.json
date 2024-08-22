@@ -39,6 +39,51 @@
         "Name": "Git",
         "winget": "Git.Git"
     },
+    "7-Zip": {
+        "category": "Instalacija programa",
+        "Name": "7-Zip",
+        "winget": "7zip.7zip"
+    },
+    "Firefox": {
+        "category": "Instalacija programa",
+        "Name": "Firefox",
+        "winget": "Mozilla.Firefox"
+    },
+    "Chrome": {
+        "category": "Instalacija programa",
+        "Name": "Chrome",
+        "winget": "Google.Chrome"
+    },
+    "Notepad ++": {
+        "category": "Instalacija programa",
+        "Name": "Notepad ++",
+        "winget": "Notepad++.Notepad++"
+    },
+    "Microsoft Visual Studio Code": {
+        "category": "Instalacija programa",
+        "Name": "Microsoft Visual Studio Code",
+        "winget": "Microsoft.VisualStudioCode"
+    },
+    "VLC": {
+        "category": "Instalacija programa",
+        "Name": "VLC",
+        "winget": "VideoLAN.VLC"
+    },
+    "GIMP": {
+        "category": "Instalacija programa",
+        "Name": "GIMP",
+        "winget": "GIMP.GIMP"
+    },
+    "Inkscape": {
+        "category": "Instalacija programa",
+        "Name": "Inkscape",
+        "winget": "Inkscape.Inkscape"
+    },
+    "Blender": {
+        "category": "Instalacija programa",
+        "Name": "Blender",
+        "winget": "BlenderFoundation.Blender"
+    },
     "Adobe Acrobat Reader": {
         "category": "Instalacija programa",
         "Name": "Adobe Acrobat Reader",
@@ -83,5 +128,10 @@
         "category": "Instalacija programa",
         "Name": "PowerBI",
         "winget": "Microsoft.PowerBI"
+    },
+    "MongoDB": {
+        "category": "Instalacija programa",
+        "Name": "MongoDB",
+        "winget": "MongoDB.Server"
     }
 }
