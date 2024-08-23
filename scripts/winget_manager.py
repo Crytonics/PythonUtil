@@ -83,7 +83,7 @@ try:
             if not hasattr(self, 'installed_programs'):
                 print("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
                 logging.info("***[Checking Installed Programs]*** Fetching list of installed programs using winget")
-                result = subprocess.run(["winget", "list"], capture_output=True, text=True, check=True)
+                result = subprocess.run(["winget", "list"], capture_output=True, text=True, check=True, encoding='utf-8')
                 self.installed_programs = result.stdout.lower()
             
             if program_name.lower() in self.installed_programs:
@@ -184,7 +184,7 @@ try:
                 try:
                     logging.info(f"***[Winget]*** Installing {program_name} using winget")
                     print(f"***[Winget]*** Installing {program_name} using winget")
-                    subprocess.run(["powershell", "-Command", ps_command], check=True)
+                    subprocess.run(["powershell", "-Command", ps_command], check=True, encoding='utf-8')
                     logging.info(f"***[Winget]*** Successfully installed {program_name}")
                     print(f"***[Winget]*** Successfully installed {program_name}")
                     self.onInstallFinishedWinget(program_name, True)
@@ -262,7 +262,7 @@ try:
                 try:
                     logging.info(f"***[Winget]*** Uninstalling {program_name} using winget")
                     print(f"***[Winget]*** Uninstalling {program_name} using winget")
-                    subprocess.run(["powershell", "-Command", ps_command], check=True)
+                    subprocess.run(["powershell", "-Command", ps_command], check=True, encoding='utf-8')
                     logging.info(f"***[Winget]*** Successfully uninstalled {program_name}")
                     print(f"***[Winget]*** Successfully uninstalled {program_name}")
                     self.onUninstallFinishedWinget(program_name, True)
@@ -339,7 +339,7 @@ try:
                 try:
                     logging.info(f"***[Winget]*** Updating {program_name} using winget")
                     print(f"***[Winget]*** Updating {program_name} using winget")
-                    subprocess.run(["powershell", "-Command", ps_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True)
+                    subprocess.run(["powershell", "-Command", ps_command], stdout=subprocess.PIPE, stderr=subprocess.PIPE, text=True, check=True, encoding='utf-8')
                     logging.info(f"***[Winget]*** Successfully updated {program_name}")
                     print(f"***[Winget]*** Successfully updated {program_name}")
                     self.onUpdateFinishedWinget(program_name, True)
