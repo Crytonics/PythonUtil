@@ -96,6 +96,9 @@ try:
 
     def installPythonModules(self):
         try:
+            logging.info("Starting installation of Python modules.")
+            print("Starting installation of Python modules.")
+            
             with open('functions/python/modules.txt', 'r') as file:
                 requirements = file.read().splitlines()
                 
@@ -104,6 +107,9 @@ try:
 
                 if missing_packages:
                     subprocess.check_call([sys.executable, '-m', 'pip', 'install', *missing_packages])
+            
+            logging.info("Finished installation of Python modules.")
+            print("Finished installation of Python modules.")
 
         except Exception as e:  
             handle_exception(e)
