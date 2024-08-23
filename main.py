@@ -3,13 +3,23 @@ import os
 import subprocess
 import ctypes
 import logging
-from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton, QMessageBox, QListWidgetItem, QProgressBar, QCheckBox, QLabel, QTabWidget
+from PyQt5.QtWidgets import QApplication, QWidget, QVBoxLayout, QHBoxLayout, QListWidget, QPushButton, QMessageBox, QProgressBar, QCheckBox, QLabel, QTabWidget
 
-from scripts.winget_manager import loadWingetData, is_program_installed_winget, selectAllWinget, selectAllWingetUpdaUnins, categorySelectAllWinget, categorySelectAllWingetUpdaUnins, onItemChangedWinget, onItemChangedWingetUpdaUnins, installSelectedWinget, installNextWinget, onInstallFinishedWinget, updateCounterLabelWinget, uninstallSelectedWingetUpdaUnins, uninstallNextWinget, onUninstallFinishedWinget, updateSelectedWingetUpdaUnins, updateNextWinget, onUpdateFinishedWinget
-from scripts.install_programs_manager import updateCounterLabel, loadFolders, is_program_installed, is_program_installed_for_uninstall, selectAll, selectAllUninstall, installSelected, categorySelectAll, onItemChanged, installNext, getCategoryForProgram, onInstallFinished
-from scripts.policies import applyPolicies, revertPolicies, installPythonModules  # Import the methods from policies.py
-from scripts.uninstall import loadUninstallData, uninstallSelected, uninstallNext, onUninstallFinished  # Import methods from uninstall.py
-
+from scripts.winget_manager import (
+    loadWingetData, is_program_installed_winget, selectAllWinget, selectAllWingetUpdaUnins, 
+    categorySelectAllWinget, categorySelectAllWingetUpdaUnins, onItemChangedWinget, 
+    onItemChangedWingetUpdaUnins, installSelectedWinget, installNextWinget, 
+    onInstallFinishedWinget, updateCounterLabelWinget, uninstallSelectedWingetUpdaUnins, 
+    uninstallNextWinget, onUninstallFinishedWinget, updateSelectedWingetUpdaUnins, 
+    updateNextWinget, onUpdateFinishedWinget
+)
+from scripts.install_programs_manager import (
+    updateCounterLabel, loadFolders, is_program_installed, is_program_installed_for_uninstall, 
+    selectAll, selectAllUninstall, installSelected, categorySelectAll, onItemChanged, 
+    installNext, getCategoryForProgram, onInstallFinished
+)
+from scripts.policies import applyPolicies, revertPolicies, installPythonModules
+from scripts.uninstall import loadUninstallData, uninstallSelected, uninstallNext, onUninstallFinished
 
 # Configure logging
 logging.basicConfig(filename='log.txt', level=logging.INFO, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -21,7 +31,6 @@ def is_admin():
         return False
 
 if not is_admin():
-    # Re-run the program with admin rights
     ctypes.windll.shell32.ShellExecuteW(None, "runas", sys.executable, __file__, None, 1)
     sys.exit()
 
@@ -54,246 +63,214 @@ def check_and_install_requirements():
 check_and_install_requirements()
 
 class App(QWidget):
-        def __init__(self):
-            try:
-                super().__init__()
-                self.all_installed_successfully = True  # Flag to track installation success
-                self.installCounter = 0  # Initialize the counter
-                self.totalPrograms = 0  # Initialize the total number of programs
-                self.totalProgramsWinget = 0  # Initialize the total number of programs
-                self.installedCountWinget = 0  # Initialize the installed count
-                self.initUI()  # Call initUI after initializing attributes
-            except Exception as e:
-                exc_type, exc_obj, exc_tb = sys.exc_info()
-                fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
-                line_number = exc_tb.tb_lineno
-                error_message = f"An error occurred in {fname} at line {line_number}: {e}"
-                
-                logging.error(error_message)
-                print(error_message)
-                QMessageBox.critical(None, "Error", error_message)
-                sys.exit(1)
+    def __init__(self):
+        try:
+            super().__init__()
+            self.all_installed_successfully = True
+            self.installCounter = 0
+            self.totalPrograms = 0
+            self.totalProgramsWinget = 0
+            self.installedCountWinget = 0
+            self.initUI()
+        except Exception as e:
+            exc_type, exc_obj, exc_tb = sys.exc_info()
+            fname = os.path.split(exc_tb.tb_frame.f_code.co_filename)[1]
+            line_number = exc_tb.tb_lineno
+            error_message = f"An error occurred in {fname} at line {line_number}: {e}"
+            logging.error(error_message)
+            print(error_message)
+            QMessageBox.critical(None, "Error", error_message)
+            sys.exit(1)
 
-        def initUI(self):
-            self.setWindowTitle('Program Manager')
-            self.setGeometry(100, 100, 400, 300)
+    def initUI(self):
+        self.setWindowTitle('Program Manager')
+        self.setGeometry(100, 100, 400, 300)
 
-            layout = QVBoxLayout()
-            self.tabWidget = QTabWidget()
-            layout.addWidget(self.tabWidget)
+        layout = QVBoxLayout()
+        self.tabWidget = QTabWidget()
+        layout.addWidget(self.tabWidget)
 
-            # New Tab (Scripts)
-            self.scripts = QWidget()
-            self.tabWidget.addTab(self.scripts, "Scripts")
+        self.initScriptsTab()
+        self.initUninstallTab()
+        self.initInstallTab()
+        self.initWingetInstallTab()
+        self.initWingetUpdateUninstallTab()
 
-            ScriptsLayout = QVBoxLayout()
-            self.scripts.setLayout(ScriptsLayout)
+        self.setLayout(layout)
+        self.loadFolders()
+        self.loadWingetData()
 
-            # Add apply policies button
-            self.policiesButton = QPushButton('Apply group policies')
-            self.policiesButton.clicked.connect(self.applyPolicies)
-            ScriptsLayout.addWidget(self.policiesButton)
+    def initScriptsTab(self):
+        self.scripts = QWidget()
+        self.tabWidget.addTab(self.scripts, "Scripts")
+        scriptsLayout = QVBoxLayout()
+        self.scripts.setLayout(scriptsLayout)
 
-            # Add revert policies button
-            self.policiesButton = QPushButton('Revert group policies')
-            self.policiesButton.clicked.connect(self.revertPolicies)
-            ScriptsLayout.addWidget(self.policiesButton)
+        self.addButton(scriptsLayout, 'Apply group policies', self.applyPolicies)
+        self.addButton(scriptsLayout, 'Revert group policies', self.revertPolicies)
+        self.addButton(scriptsLayout, 'Install python modules', self.installPythonModules)
 
-            # Add revert policies button
-            self.policiesButton = QPushButton('Install python modules')
-            self.policiesButton.clicked.connect(self.installPythonModules)
-            ScriptsLayout.addWidget(self.policiesButton)
+    def initUninstallTab(self):
+        self.uninstallTab = QWidget()
+        self.tabWidget.addTab(self.uninstallTab, "Uninstall Programs")
+        uninstallLayout = QVBoxLayout()
+        self.uninstallTab.setLayout(uninstallLayout)
 
-            # New Tab (Uninstall Programs)
-            self.newTab = QWidget()
-            self.tabWidget.addTab(self.newTab, "Uninstall Programs")
+        self.uninstallSelectAllCheckbox = QCheckBox('Select All')
+        self.uninstallSelectAllCheckbox.stateChanged.connect(self.selectAllUninstall)
+        uninstallLayout.addWidget(self.uninstallSelectAllCheckbox)
 
-            newTabLayout = QVBoxLayout()
-            self.newTab.setLayout(newTabLayout)
+        self.scriptsListWidget = QListWidget()
+        uninstallLayout.addWidget(self.scriptsListWidget)
 
-            # Add "Select All" checkbox for uninstalling programs
-            self.uninstallSelectAllCheckbox = QCheckBox('Select All')
-            self.uninstallSelectAllCheckbox.stateChanged.connect(self.selectAllUninstall)
-            newTabLayout.addWidget(self.uninstallSelectAllCheckbox)
-            
-            # Add new list to the "Uninstall Programs" tab
-            self.scriptsListWidget = QListWidget()
-            newTabLayout.addWidget(self.scriptsListWidget)
+        self.uninstallButton = QPushButton('Uninstall Selected')
+        self.uninstallButton.clicked.connect(self.uninstallSelected)
+        uninstallLayout.addWidget(self.uninstallButton)
 
-            # Add uninstall button
-            self.uninstallButton = QPushButton('Uninstall Selected')
-            self.uninstallButton.clicked.connect(self.uninstallSelected)
-            newTabLayout.addWidget(self.uninstallButton)
+        self.loadUninstallData()
 
-            # Load uninstall data from JSON
-            self.loadUninstallData()
+    def initInstallTab(self):
+        self.installTab = QWidget()
+        self.tabWidget.addTab(self.installTab, "Install Programs")
+        installLayout = QVBoxLayout()
+        hLayout = QHBoxLayout()
+        installLayout.addLayout(hLayout)
 
-            # New Tab (Install Programs)
-            self.installTab = QWidget()
-            self.tabWidget.addTab(self.installTab, "Install Programs")
+        self.listWidget = QListWidget()
+        installLayout.addWidget(self.listWidget)
 
-            installLayout = QVBoxLayout()
-            hLayout = QHBoxLayout()
+        self.selectAllCheckbox = QCheckBox('Select All')
+        self.selectAllCheckbox.stateChanged.connect(self.selectAll)
+        hLayout.addWidget(self.selectAllCheckbox)
 
-            installLayout.addLayout(hLayout)
+        self.listWidget.itemChanged.connect(self.onItemChanged)
 
-            self.listWidget = QListWidget()
-            installLayout.addWidget(self.listWidget)
-            
-            # Add "Select All" checkbox
-            self.selectAllCheckbox = QCheckBox('Select All')
-            self.selectAllCheckbox.stateChanged.connect(self.selectAll)
-            hLayout.addWidget(self.selectAllCheckbox)
+        self.counterLabel = QLabel('Installed: 0/0')
+        hLayout.addWidget(self.counterLabel)
 
-            self.selectAllCheckbox.stateChanged.connect(self.selectAll)
-            self.listWidget.itemChanged.connect(self.onItemChanged)
+        self.installButton = QPushButton('Install Selected')
+        self.installButton.clicked.connect(self.installSelected)
+        installLayout.addWidget(self.installButton)
 
-            self.counterLabel = QLabel('Installed: 0/0')
-            hLayout.addWidget(self.counterLabel)
+        self.progressBar = QProgressBar()
+        installLayout.addWidget(self.progressBar)
+        self.progressBar.setValue(0)
 
-            # Add install button
-            self.installButton = QPushButton('Install Selected')
-            self.installButton.clicked.connect(self.installSelected)
-            installLayout.addWidget(self.installButton)
+        self.installTab.setLayout(installLayout)
 
-            # Add progress bar
-            self.progressBar = QProgressBar()
-            installLayout.addWidget(self.progressBar)
-            self.progressBar.setValue(0)
+    def initWingetInstallTab(self):
+        self.wingetTab = QWidget()
+        self.tabWidget.addTab(self.wingetTab, "Winget Install")
+        wingetLayout = QVBoxLayout()
+        wingetHLayout = QHBoxLayout()
+        wingetLayout.addLayout(wingetHLayout)
 
-            self.installTab.setLayout(installLayout)
-            self.setLayout(layout)
-            self.loadFolders()
+        self.listWidgetWinget = QListWidget()
+        wingetLayout.addWidget(self.listWidgetWinget)
 
-            # New Tab (IWinget Intall)
-            self.wingetTab = QWidget()
-            self.tabWidget.addTab(self.wingetTab, "Winget Install")
+        self.selectAllCheckboxWinget = QCheckBox('Select All')
+        self.selectAllCheckboxWinget.stateChanged.connect(self.selectAllWinget)
+        wingetHLayout.addWidget(self.selectAllCheckboxWinget)
 
-            WingetLayout = QVBoxLayout()
-            WingethLayout = QHBoxLayout()
+        self.listWidgetWinget.itemChanged.connect(self.onItemChangedWinget)
 
-            WingetLayout.addLayout(WingethLayout)
+        self.counterLabelWinget = QLabel('Installed: 0/0')
+        wingetHLayout.addWidget(self.counterLabelWinget)
 
-            self.listWidgetWinget = QListWidget()
-            WingetLayout.addWidget(self.listWidgetWinget)
-            
-            # Add "Select All" checkbox
-            self.selectAllCheckboxWinget = QCheckBox('Select All')
-            self.selectAllCheckboxWinget.stateChanged.connect(self.selectAllWinget)
-            WingethLayout.addWidget(self.selectAllCheckboxWinget)
+        self.installButtonWinget = QPushButton('Install Selected')
+        self.installButtonWinget.clicked.connect(self.installSelectedWinget)
+        wingetLayout.addWidget(self.installButtonWinget)
 
-            self.selectAllCheckboxWinget.stateChanged.connect(self.selectAllWinget)
-            self.listWidgetWinget.itemChanged.connect(self.onItemChangedWinget)
+        self.progressBarWinget = QProgressBar()
+        wingetLayout.addWidget(self.progressBarWinget)
+        self.progressBarWinget.setValue(0)
 
-            self.counterLabelWinget = QLabel('Installed: 0/0')
-            WingethLayout.addWidget(self.counterLabelWinget)
+        self.wingetTab.setLayout(wingetLayout)
 
-            # Add install button
-            self.installButtonWinget = QPushButton('Install Selected')
-            self.installButtonWinget.clicked.connect(self.installSelectedWinget)
-            WingetLayout.addWidget(self.installButtonWinget)
+    def initWingetUpdateUninstallTab(self):
+        self.wingetUpdaUninsTab = QWidget()
+        self.tabWidget.addTab(self.wingetUpdaUninsTab, "Winget Update/Uninstall")
+        wingetUpdaUninsLayout = QVBoxLayout()
+        wingetHUpdaUninsLayout = QHBoxLayout()
+        wingetBUpdaUninsLayout = QHBoxLayout()
+        wingetUpdaUninsLayout.addLayout(wingetHUpdaUninsLayout)
 
-            # Add progress bar
-            self.progressBarWinget = QProgressBar()
-            WingetLayout.addWidget(self.progressBarWinget)
-            self.progressBarWinget.setValue(0)
+        self.listWidgetWingetUpdaUnins = QListWidget()
+        wingetUpdaUninsLayout.addWidget(self.listWidgetWingetUpdaUnins)
+        wingetUpdaUninsLayout.addLayout(wingetBUpdaUninsLayout)
 
-            self.wingetTab.setLayout(WingetLayout)
-            self.setLayout(layout)
-            #self.loadWingetData()
+        self.selectAllCheckboxWingetUpdaUnins = QCheckBox('Select All')
+        self.selectAllCheckboxWingetUpdaUnins.stateChanged.connect(self.selectAllWingetUpdaUnins)
+        wingetHUpdaUninsLayout.addWidget(self.selectAllCheckboxWingetUpdaUnins)
 
-            # New Tab (IWinget Intall)
-            self.wingetUpdaUninsTab = QWidget()
-            self.tabWidget.addTab(self.wingetUpdaUninsTab, "Winget Update/Uninstall")
+        self.listWidgetWingetUpdaUnins.itemChanged.connect(self.onItemChangedWingetUpdaUnins)
 
-            WingetUpdaUninsLayout = QVBoxLayout()
-            WingethUpdaUninsLayout = QHBoxLayout()
-            WingetbUpdaUninsLayout = QHBoxLayout()
+        self.updateButtonWingetUpdaUnins = QPushButton('Update Selected')
+        self.updateButtonWingetUpdaUnins.clicked.connect(self.updateSelectedWingetUpdaUnins)
+        wingetBUpdaUninsLayout.addWidget(self.updateButtonWingetUpdaUnins)
 
-            WingetUpdaUninsLayout.addLayout(WingethUpdaUninsLayout)
+        self.uninstallButtonWingetUpdaUnins = QPushButton('Uninstall Selected')
+        self.uninstallButtonWingetUpdaUnins.clicked.connect(self.uninstallSelectedWingetUpdaUnins)
+        wingetBUpdaUninsLayout.addWidget(self.uninstallButtonWingetUpdaUnins)
 
-            self.listWidgetWingetUpdaUnins = QListWidget()
-            WingetUpdaUninsLayout.addWidget(self.listWidgetWingetUpdaUnins)
+        self.progressBarWingetUpdaUnins = QProgressBar()
+        wingetUpdaUninsLayout.addWidget(self.progressBarWingetUpdaUnins)
+        self.progressBarWingetUpdaUnins.setValue(0)
 
-            WingetUpdaUninsLayout.addLayout(WingetbUpdaUninsLayout)
+        self.wingetUpdaUninsTab.setLayout(wingetUpdaUninsLayout)
 
-            # Add "Select All" checkbox
-            self.selectAllCheckboxWingetUpdaUnins = QCheckBox('Select All')
-            self.selectAllCheckboxWingetUpdaUnins.stateChanged.connect(self.selectAllWingetUpdaUnins)
+    def addButton(self, layout, text, callback):
+        button = QPushButton(text)
+        button.clicked.connect(callback)
+        layout.addWidget(button)
 
-            WingethUpdaUninsLayout.addWidget(self.selectAllCheckboxWingetUpdaUnins)
+    # Import methods from winget_manager (Update/Uninstall)
+    selectAllWingetUpdaUnins = selectAllWingetUpdaUnins
+    categorySelectAllWingetUpdaUnins = categorySelectAllWingetUpdaUnins
+    onItemChangedWingetUpdaUnins = onItemChangedWingetUpdaUnins
+    uninstallSelectedWingetUpdaUnins = uninstallSelectedWingetUpdaUnins
+    uninstallNextWinget = uninstallNextWinget
+    onUninstallFinishedWinget = onUninstallFinishedWinget
+    updateSelectedWingetUpdaUnins = updateSelectedWingetUpdaUnins
+    updateNextWinget = updateNextWinget
+    onUpdateFinishedWinget = onUpdateFinishedWinget
 
-            self.selectAllCheckboxWingetUpdaUnins.stateChanged.connect(self.selectAllWingetUpdaUnins)
-            self.listWidgetWingetUpdaUnins.itemChanged.connect(self.onItemChangedWingetUpdaUnins)
+    # Import methods from uninstall
+    loadUninstallData = loadUninstallData
+    uninstallSelected = uninstallSelected
+    uninstallNext = uninstallNext
+    onUninstallFinished = onUninstallFinished
 
-            # Add install button
-            self.updateButtonWingetUpdaUnins = QPushButton('Update Selected')
-            self.updateButtonWingetUpdaUnins.clicked.connect(self.updateSelectedWingetUpdaUnins)
-            WingetbUpdaUninsLayout.addWidget(self.updateButtonWingetUpdaUnins)
+    # Import methods from scripts
+    applyPolicies = applyPolicies
+    revertPolicies = revertPolicies
+    installPythonModules = installPythonModules
 
-            # Add install button
-            self.uninstallButtonWingetUpdaUnins = QPushButton('Uninstall Selected')
-            self.uninstallButtonWingetUpdaUnins.clicked.connect(self.uninstallSelectedWingetUpdaUnins)
-            WingetbUpdaUninsLayout.addWidget(self.uninstallButtonWingetUpdaUnins)
+    # Import methods from program_manager
+    updateCounterLabel = updateCounterLabel
+    loadFolders = loadFolders
+    is_program_installed = is_program_installed
+    is_program_installed_for_uninstall = is_program_installed_for_uninstall
+    selectAll = selectAll
+    selectAllUninstall = selectAllUninstall
+    installSelected = installSelected
+    categorySelectAll = categorySelectAll
+    onItemChanged = onItemChanged
+    installNext = installNext
+    getCategoryForProgram = getCategoryForProgram
+    onInstallFinished = onInstallFinished
 
-            # Add progress bar
-            self.progressBarWingetUpdaUnins = QProgressBar()
-            WingetUpdaUninsLayout.addWidget(self.progressBarWingetUpdaUnins)
-            self.progressBarWingetUpdaUnins.setValue(0)
+    # Import methods from winget_manager
+    loadWingetData = loadWingetData
+    is_program_installed_winget = is_program_installed_winget
+    selectAllWinget = selectAllWinget
+    categorySelectAllWinget = categorySelectAllWinget
+    onItemChangedWinget = onItemChangedWinget
+    installSelectedWinget = installSelectedWinget
+    installNextWinget = installNextWinget
+    onInstallFinishedWinget = onInstallFinishedWinget
+    updateCounterLabelWinget = updateCounterLabelWinget
 
-            self.wingetUpdaUninsTab.setLayout(WingetUpdaUninsLayout)
-            self.setLayout(layout)
-            self.loadWingetData()
-
-        # Import methods from winget_manager (Update/Uninstall)
-        selectAllWingetUpdaUnins = selectAllWingetUpdaUnins
-        categorySelectAllWingetUpdaUnins = categorySelectAllWingetUpdaUnins
-        onItemChangedWingetUpdaUnins = onItemChangedWingetUpdaUnins
-        
-        uninstallSelectedWingetUpdaUnins = uninstallSelectedWingetUpdaUnins
-        uninstallNextWinget = uninstallNextWinget
-        onUninstallFinishedWinget = onUninstallFinishedWinget
-
-        updateSelectedWingetUpdaUnins = updateSelectedWingetUpdaUnins
-        updateNextWinget = updateNextWinget
-        onUpdateFinishedWinget = onUpdateFinishedWinget
-
-        # Import methods from uninstall
-        loadUninstallData = loadUninstallData
-        uninstallSelected = uninstallSelected
-        uninstallNext = uninstallNext
-        onUninstallFinished = onUninstallFinished
-        
-        # Import methods from scripts
-        applyPolicies = applyPolicies
-        revertPolicies = revertPolicies
-        installPythonModules = installPythonModules
-
-        # Import methods from program_manager
-        updateCounterLabel = updateCounterLabel
-        loadFolders = loadFolders
-        is_program_installed = is_program_installed
-        is_program_installed_for_uninstall = is_program_installed_for_uninstall
-        selectAll = selectAll
-        selectAllUninstall = selectAllUninstall
-        installSelected = installSelected
-        categorySelectAll = categorySelectAll
-        onItemChanged = onItemChanged
-        installNext = installNext
-        getCategoryForProgram = getCategoryForProgram
-        onInstallFinished = onInstallFinished
-
-        # Import methods from winget_manager
-        loadWingetData = loadWingetData
-        is_program_installed_winget = is_program_installed_winget
-        selectAllWinget = selectAllWinget
-        categorySelectAllWinget = categorySelectAllWinget
-        onItemChangedWinget = onItemChangedWinget
-        installSelectedWinget = installSelectedWinget
-        installNextWinget = installNextWinget
-        onInstallFinishedWinget = onInstallFinishedWinget
-        updateCounterLabelWinget = updateCounterLabelWinget
-        
 if __name__ == '__main__':
     app = QApplication(sys.argv)
     ex = App()
