@@ -106,8 +106,8 @@ class App(QWidget):
         scriptsLayout = QVBoxLayout()
         self.scripts.setLayout(scriptsLayout)
 
-        self.addButton(scriptsLayout, 'Apply group policies', self.applyPolicies)
-        self.addButton(scriptsLayout, 'Revert group policies', self.revertPolicies)
+        #self.addButton(scriptsLayout, 'Apply group policies', self.applyPolicies)
+        #self.addButton(scriptsLayout, 'Revert group policies', self.revertPolicies)
         self.addButton(scriptsLayout, 'Install python modules', self.installPythonModules)
 
     def initUninstallTab(self):
